@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { useAuth } from "@/hooks/useAuth";
 import { useLiveBus } from "@/hooks/useLiveBus";
@@ -13,6 +14,7 @@ import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 
 export default function StudentDashboardPage() {
+  const router = useRouter();
   const { user, profile, isLoading: authLoading } = useAuth();
 
   const [allocatedBusId, setAllocatedBusId] = useState<string | null>(
@@ -149,9 +151,16 @@ export default function StudentDashboardPage() {
     return () => clearTimeout(handler);
   }, [liveBus.location, liveBus.isOnTrip, myStopId, stops]);
 
+  // Redirect unauthenticated visitors to login
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace("/login?from=/dashboard");
+    }
+  }, [authLoading, user, router]);
+
   const myStop = stops.find((s) => s.id === myStopId);
 
-  if (loading) {
+  if (authLoading || (loading && user)) {
     return (
       <div className="flex min-h-screen flex-col bg-slate-50/50 dark:bg-slate-950">
         <Navbar />
@@ -159,12 +168,18 @@ export default function StudentDashboardPage() {
           <div className="flex flex-col items-center gap-3">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
             <p className="text-sm text-muted-foreground">
-              Loading your live bus route...
+              {authLoading
+                ? "Verifying student authentication..."
+                : "Loading your live bus route..."}
             </p>
           </div>
         </main>
       </div>
     );
+  }
+
+  if (!user) {
+    return null;
   }
 
   return (
