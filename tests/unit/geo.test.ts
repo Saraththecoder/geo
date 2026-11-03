@@ -102,3 +102,4 @@ describe("Geo Utilities - Moving Average & Accuracy Filter", () => {
     expect(p3?.speed).toBe(20);
   });
 });
+

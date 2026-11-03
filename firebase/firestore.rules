@@ -1,0 +1,68 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.role == 'admin';
+    }
+
+    function isDriver() {
+      return isAuthenticated() && request.auth.token.role == 'driver';
+    }
+
+    function isStudent() {
+      return isAuthenticated() && request.auth.token.role == 'student';
+    }
+
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    // Users collection
+    match /users/{uid} {
+      allow read: if isAuthenticated() && (isAdmin() || isOwner(uid));
+      allow create: if isAuthenticated() && (isAdmin() || isOwner(uid));
+      allow update: if isAuthenticated() && (
+        isAdmin() || 
+        (isOwner(uid) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'allocatedBusId']))
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Buses collection
+    match /buses/{busId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Routes collection
+    match /routes/{routeId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Stops collection
+    match /stops/{stopId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Trips collection
+    match /trips/{tripId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && (
+        isAdmin() || 
+        (isDriver() && request.resource.data.driverUid == request.auth.uid)
+      );
+      allow update: if isAuthenticated() && (
+        isAdmin() || 
+        (isDriver() && resource.data.driverUid == request.auth.uid)
+      );
+      allow delete: if isAdmin();
+    }
+  }
+}
