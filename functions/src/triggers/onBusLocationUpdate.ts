@@ -136,3 +136,4 @@ export const onBusLocationUpdate = functions.database
 
     return null;
   });
+

@@ -76,3 +76,4 @@ describe("Notifications & Cloud Functions Logic", () => {
     expect(payload.data.tripId).toBe("trip_001");
   });
 });
+

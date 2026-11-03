@@ -38,7 +38,12 @@ export function EtaBadge({ eta, isLoading, stopName }: EtaBadgeProps) {
   const formattedTime = formatDuration(eta.durationSeconds);
 
   return (
-    <div className="flex items-center justify-between rounded-2xl border bg-card p-5 shadow-sm">
+    <div
+      role="region"
+      aria-label="Estimated Arrival Information"
+      aria-live="polite"
+      className="flex items-center justify-between rounded-2xl border bg-card p-5 shadow-sm"
+    >
       <div className="space-y-1">
         <div className="flex items-center gap-2">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

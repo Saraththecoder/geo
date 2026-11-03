@@ -119,6 +119,7 @@ export default function LiveMapInner({
         {busLocation && (
           <button
             type="button"
+            aria-label="Focus map view on moving bus"
             onClick={() => {
               setCenterTarget(null);
               setTimeout(() => setCenterTarget("bus"), 10);
@@ -133,6 +134,7 @@ export default function LiveMapInner({
         {myStop && (
           <button
             type="button"
+            aria-label={`Focus map view on designated stop: ${myStop.name}`}
             onClick={() => {
               setCenterTarget(null);
               setTimeout(() => setCenterTarget("stop"), 10);
@@ -146,6 +148,7 @@ export default function LiveMapInner({
         {polylineCoords.length > 0 && (
           <button
             type="button"
+            aria-label="Fit map view to entire route bounds"
             onClick={() => {
               setCenterTarget(null);
               setTimeout(() => setCenterTarget("route"), 10);

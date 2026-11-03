@@ -23,3 +23,4 @@ export function calculateDistanceMeters(p1: LatLng, p2: LatLng): number {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return Math.round(EARTH_RADIUS_METERS * c);
 }
+

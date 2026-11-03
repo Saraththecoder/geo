@@ -34,7 +34,7 @@ yarn-error.log*
 next-env.d.ts
 
 # serwist / pwa generated files
-public/sw.js
+# public/sw.js (custom hand-crafted service worker tracked in repository)
 public/sw.js.map
 public/swe-worker-*.js
 
