@@ -76,3 +76,4 @@ describe("Trip Lifecycle & Data Validation", () => {
     expect(stopLogEntrySchema.safeParse(invalidStopLog).success).toBe(false);
   });
 });
+
