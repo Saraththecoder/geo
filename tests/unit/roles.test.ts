@@ -36,3 +36,4 @@ describe("Domain Validation & Role Checks", () => {
     expect(isAllowedCollegeEmail("test@other.edu", multiDomain)).toBe(false);
   });
 });
+
