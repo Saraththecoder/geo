@@ -26,13 +26,43 @@ const endTripSchema = z.object({
 });
 
 async function getAuthenticatedUser(request: NextRequest) {
-  const sessionCookie = request.cookies.get("__session")?.value;
-  if (!sessionCookie) return null;
+  let token = request.cookies.get("__session")?.value;
+  let isBearer = false;
+
+  const authHeader = request.headers.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    token = authHeader.split("Bearer ")[1];
+    isBearer = true;
+  }
+
+  if (!token) return null;
 
   try {
-    const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
-    return decoded;
-  } catch {
+    const decoded = isBearer
+      ? await adminAuth.verifyIdToken(token)
+      : await adminAuth.verifySessionCookie(token, false);
+
+    let role = (decoded.role as string) || undefined;
+    let allocatedBusId =
+      (decoded.allocatedBusId as string) || (decoded.busId as string) || undefined;
+
+    // Check Firestore user record to ensure roles and bus assignments are strictly up-to-date
+    if (!role || role === "student" || role !== "admin") {
+      const userDoc = await adminFirestore.collection("users").doc(decoded.uid).get();
+      if (userDoc.exists) {
+        const firestoreData = userDoc.data();
+        if (firestoreData?.role) {
+          role = firestoreData.role;
+        }
+        if (firestoreData?.allocatedBusId) {
+          allocatedBusId = firestoreData.allocatedBusId;
+        }
+      }
+    }
+
+    return { ...decoded, role, allocatedBusId };
+  } catch (err) {
+    console.error("Auth verification failed in trips API:", err);
     return null;
   }
 }

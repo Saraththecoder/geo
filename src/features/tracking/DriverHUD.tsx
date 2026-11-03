@@ -53,7 +53,12 @@ export function DriverHUD() {
         setRoutes(routeMap);
 
         // Check for existing active trip
-        const tripRes = await fetch(`/api/trips?driverUid=${user.uid}&status=active`);
+        const idToken = await user.getIdToken();
+        const tripRes = await fetch(`/api/trips?driverUid=${user.uid}&status=active`, {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
         if (tripRes.ok) {
           const tripData = await tripRes.json();
           if (tripData.success && tripData.data.length > 0) {
@@ -90,9 +95,13 @@ export function DriverHUD() {
       await wakeLock.request();
 
       // 2. Start trip on server
+      const idToken = await user.getIdToken();
       const res = await fetch("/api/trips", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify({
           busId: bus.id,
           routeId: bus.routeId,
@@ -135,9 +144,13 @@ export function DriverHUD() {
       await wakeLock.release();
 
       // 3. Mark trip ended on server
+      const idToken = await user.getIdToken();
       const res = await fetch("/api/trips", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify({
           tripId: activeTrip.id,
           busId: activeTrip.busId,
