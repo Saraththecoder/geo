@@ -65,3 +65,4 @@ student1@aits.edu,Student One,10,Main Gate
     expect(result.errors.length).toBe(0);
   });
 });
+

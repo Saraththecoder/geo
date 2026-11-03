@@ -7,6 +7,7 @@ import { useLiveBus } from "@/hooks/useLiveBus";
 import { LiveMap } from "@/components/map/LiveMap";
 import { SignalStatusBadge } from "@/features/tracking/SignalStatusBadge";
 import { EtaBadge } from "@/features/tracking/EtaBadge";
+import { NotificationPrompt } from "@/features/notifications/NotificationPrompt";
 import { Bus, BusRoute, Stop, EtaResult } from "@/types";
 import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
@@ -235,6 +236,9 @@ export default function StudentDashboardPage() {
                 stopName={myStop?.name || "your stop"}
               />
             )}
+
+            {/* Notification Permission Banner */}
+            <NotificationPrompt />
 
             {/* Live Leaflet Map */}
             <LiveMap
