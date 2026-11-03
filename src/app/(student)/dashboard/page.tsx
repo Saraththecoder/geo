@@ -13,9 +13,12 @@ import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 
 export default function StudentDashboardPage() {
-  const { user, profile } = useAuth();
-  const allocatedBusId = profile?.allocatedBusId;
-  const myStopId = profile?.stopId;
+  const { user, profile, isLoading: authLoading } = useAuth();
+
+  const [allocatedBusId, setAllocatedBusId] = useState<string | null>(
+    profile?.allocatedBusId || null
+  );
+  const [myStopId, setMyStopId] = useState<string | null>(profile?.stopId || null);
 
   const [bus, setBus] = useState<Bus | null>(null);
   const [route, setRoute] = useState<BusRoute | null>(null);
@@ -25,51 +28,83 @@ export default function StudentDashboardPage() {
   const [etaLoading, setEtaLoading] = useState<boolean>(false);
 
   // Subscribe to live bus position from Realtime DB
-  const liveBus = useLiveBus(allocatedBusId);
+  const liveBus = useLiveBus(allocatedBusId || undefined);
 
-  // Load static allocations from Firestore
+  // Load static allocations from Server API / Firestore
   useEffect(() => {
+    let isMounted = true;
+
     async function loadAllocations() {
-      if (!user) return;
-      if (!allocatedBusId) {
-        setLoading(false);
+      if (!user) {
+        if (!authLoading && isMounted) {
+          setLoading(false);
+        }
         return;
       }
 
       try {
         setLoading(true);
+        const idToken = await user.getIdToken();
 
-        // Fetch allocated bus
-        const busDocSnap = await getDoc(doc(db, "buses", allocatedBusId));
-        if (!busDocSnap.exists()) {
-          setLoading(false);
-          return;
-        }
+        // 1. Fetch through server route handler (bypasses any client rule issues)
+        const res = await fetch("/api/allocations/my-bus", {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
 
-        const busData = { id: busDocSnap.id, ...busDocSnap.data() } as Bus;
-        setBus(busData);
-
-        // Fetch route
-        if (busData.routeId) {
-          const routeDocSnap = await getDoc(doc(db, "routes", busData.routeId));
-          if (routeDocSnap.exists()) {
-            setRoute({ id: routeDocSnap.id, ...routeDocSnap.data() } as BusRoute);
+        if (res.ok) {
+          const resData = await res.json();
+          if (resData.success && resData.data) {
+            const data = resData.data;
+            if (isMounted) {
+              setAllocatedBusId(data.allocatedBusId || null);
+              setMyStopId(data.myStopId || null);
+              setBus(data.bus);
+              setRoute(data.route);
+              setStops(data.stops || []);
+              setLoading(false);
+            }
+            return;
           }
         }
 
-        // Fetch stops
-        const stopsSnap = await getDocs(collection(db, "stops"));
-        const stopList = stopsSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as Stop[];
-        setStops(stopList);
+        // 2. Fallback to client Firestore if API fails
+        if (profile?.allocatedBusId) {
+          const busDocSnap = await getDoc(doc(db, "buses", profile.allocatedBusId));
+          if (busDocSnap.exists() && isMounted) {
+            const busData = { id: busDocSnap.id, ...busDocSnap.data() } as Bus;
+            setBus(busData);
+            setAllocatedBusId(busData.id);
+
+            if (busData.routeId) {
+              const routeDocSnap = await getDoc(doc(db, "routes", busData.routeId));
+              if (routeDocSnap.exists() && isMounted) {
+                setRoute({ id: routeDocSnap.id, ...routeDocSnap.data() } as BusRoute);
+              }
+            }
+
+            const stopsSnap = await getDocs(collection(db, "stops"));
+            const stopList = stopsSnap.docs.map((d) => ({
+              id: d.id,
+              ...d.data(),
+            })) as Stop[];
+            if (isMounted) setStops(stopList);
+          }
+        }
       } catch (err) {
         console.error("Error loading student allocation data:", err);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     }
 
     loadAllocations();
-  }, [user, allocatedBusId]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user, authLoading, profile?.allocatedBusId, profile?.stopId]);
 
   // Query ETA when live bus position changes
   useEffect(() => {
