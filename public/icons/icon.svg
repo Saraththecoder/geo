@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="128" fill="#2563eb"/>
+  <g fill="none" stroke="#ffffff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" transform="translate(64, 64) scale(0.75)">
+    <!-- Bus outline -->
+    <rect x="64" y="64" width="384" height="320" rx="48"/>
+    <!-- Windshield -->
+    <path d="M64 192h384"/>
+    <path d="M256 64v128"/>
+    <!-- Headlights -->
+    <circle cx="128" cy="304" r="24" fill="#ffffff"/>
+    <circle cx="384" cy="304" r="24" fill="#ffffff"/>
+    <!-- Wheels -->
+    <rect x="112" y="384" width="48" height="64" rx="16" fill="#ffffff"/>
+    <rect x="352" y="384" width="48" height="64" rx="16" fill="#ffffff"/>
+  </g>
+</svg>
