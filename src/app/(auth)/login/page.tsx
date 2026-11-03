@@ -10,7 +10,10 @@ function LoginForm() {
   const from = searchParams.get("from");
   const { user, role, signInWithGoogle, isLoading, error, clearError } = useAuth();
   const [submitting, setSubmitting] = useState(false);
-  const allowedDomain = process.env.ALLOWED_EMAIL_DOMAIN || "aits.edu";
+  const allowedDomain =
+    process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN ||
+    process.env.ALLOWED_EMAIL_DOMAIN ||
+    "aits.edu";
 
   useEffect(() => {
     if (user && !isLoading) {
@@ -118,9 +121,9 @@ function LoginForm() {
           Domain Restriction Notice:
         </p>
         <p>
-          Only active college emails ending in{" "}
-          <span className="font-semibold text-primary">@{allowedDomain}</span> can log in.
-          Personal Google accounts (@gmail.com) will be rejected.
+          Only active accounts ending in{" "}
+          <span className="font-semibold text-primary">@{allowedDomain}</span> are
+          authorized to log in.
         </p>
       </div>
     </div>

@@ -76,3 +76,4 @@ fs.writeFileSync(path.join(iconsDir, "icon-512x512.png"), icon512);
 fs.writeFileSync(path.join(iconsDir, "icon-maskable.png"), iconMaskable);
 
 console.log("✓ Successfully generated PWA PNG icons in public/icons/");
+

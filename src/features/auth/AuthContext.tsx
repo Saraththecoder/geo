@@ -49,10 +49,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
         setProfile(null);
         setRole(null);
+        const domain =
+          process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN ||
+          process.env.ALLOWED_EMAIL_DOMAIN ||
+          "aits.edu";
         setError(
-          `Access restricted: please sign in with your official college email address (@${
-            process.env.ALLOWED_EMAIL_DOMAIN || "aits.edu"
-          }).`
+          `Access restricted: please sign in with an authorized email address (@${domain}).`
         );
         setIsLoading(false);
         return;
@@ -106,22 +108,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       const provider = new GoogleAuthProvider();
-      // Prompt user to select account
-      provider.setCustomParameters({
+      const domain =
+        process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN ||
+        process.env.ALLOWED_EMAIL_DOMAIN ||
+        "aits.edu";
+
+      const customParams: Record<string, string> = {
         prompt: "select_account",
-        hd: process.env.ALLOWED_EMAIL_DOMAIN || "aits.edu",
-      });
+      };
+      if (domain && domain !== "gmail.com" && domain !== "googlemail.com") {
+        customParams.hd = domain;
+      }
+      provider.setCustomParameters(customParams);
 
       const credential = await signInWithPopup(auth, provider);
       const email = credential.user.email;
 
       if (!isAllowedCollegeEmail(email)) {
         await firebaseSignOut(auth);
-        throw new Error(
-          `Unauthorized domain. Only @${
-            process.env.ALLOWED_EMAIL_DOMAIN || "aits.edu"
-          } accounts are permitted.`
-        );
+        throw new Error(`Unauthorized domain. Only @${domain} accounts are permitted.`);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Google sign-in failed";

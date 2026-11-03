@@ -3,7 +3,9 @@
  */
 export function isAllowedCollegeEmail(
   email: string | null | undefined,
-  allowedDomainEnv = process.env.ALLOWED_EMAIL_DOMAIN || "aits.edu"
+  allowedDomainEnv = process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN ||
+    process.env.ALLOWED_EMAIL_DOMAIN ||
+    "aits.edu"
 ): boolean {
   if (!email || typeof email !== "string") {
     return false;

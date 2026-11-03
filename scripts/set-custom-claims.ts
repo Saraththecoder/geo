@@ -9,7 +9,9 @@ import * as admin from "firebase-admin";
 
 const projectId = process.env.FIREBASE_PROJECT_ID || "aits-bus";
 const databaseURL =
-  process.env.FIREBASE_DATABASE_URL || `https://${projectId}-default-rtdb.firebaseio.com`;
+  process.env.FIREBASE_DATABASE_URL ||
+  process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL ||
+  `https://${projectId}-default-rtdb.firebaseio.com`;
 
 if (admin.apps.length === 0) {
   if (process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {

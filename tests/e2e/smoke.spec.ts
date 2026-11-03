@@ -82,3 +82,4 @@ test.describe("College Bus Tracker Smoke Suite", () => {
     expect(bodyGood.data.provider).toMatch(/osrm|speed-fallback/);
   });
 });
+

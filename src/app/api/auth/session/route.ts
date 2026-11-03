@@ -42,14 +42,39 @@ export async function POST(request: NextRequest) {
 
     // Check or initialize user profile in Firestore
     const userRef = adminFirestore.collection("users").doc(decodedToken.uid);
-    const userSnap = await userRef.get();
+    let userSnap = await userRef.get();
+
+    // If no document exists for this UID, check if a profile was pre-seeded/allocated by email
+    if (!userSnap.exists && email) {
+      const emailQuery = await adminFirestore
+        .collection("users")
+        .where("email", "==", email)
+        .limit(1)
+        .get();
+
+      const preAllocatedDoc = emailQuery.docs[0];
+      if (preAllocatedDoc) {
+        const preAllocatedData = preAllocatedDoc.data();
+        await userRef.set({
+          ...preAllocatedData,
+          uid: decodedToken.uid,
+          name: decodedToken.name || preAllocatedData.name || email.split("@")[0],
+          updatedAt: Date.now(),
+        });
+
+        if (preAllocatedDoc.id !== decodedToken.uid) {
+          await preAllocatedDoc.ref.delete();
+        }
+        userSnap = await userRef.get();
+      }
+    }
 
     let role: UserRole = "student";
     let allocatedBusId: string | null = null;
     let stopId: string | null = null;
 
     if (!userSnap.exists) {
-      // First-time login: create student record
+      // First-time login without pre-existing allocation: create student record
       await userRef.set({
         uid: decodedToken.uid,
         name: decodedToken.name || email?.split("@")[0] || "User",

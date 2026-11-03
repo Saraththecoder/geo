@@ -52,6 +52,13 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  env: {
+    ALLOWED_EMAIL_DOMAIN: process.env.ALLOWED_EMAIL_DOMAIN || "aits.edu",
+    NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN:
+      process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN ||
+      process.env.ALLOWED_EMAIL_DOMAIN ||
+      "aits.edu",
+  },
   async headers() {
     return [
       {
