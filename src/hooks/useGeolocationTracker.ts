@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { LiveBusLocation } from "@/types";
-import { MovingAverageFilter, MAX_ACCEPTED_ACCURACY_METERS } from "@/lib/geo/smoothing";
+import { MovingAverageFilter } from "@/lib/geo/smoothing";
 import { ref, set } from "firebase/database";
 import { rtdb } from "@/lib/firebase/client";
 
@@ -24,10 +24,8 @@ export interface GeolocationState {
 }
 
 export function useGeolocationTracker(options: TrackerOptions = {}) {
-  const throttleMs = options.throttleMs ?? 5000;
-  const maxAccuracy =
-    options.maxAccuracyMeters ??
-    (process.env.NODE_ENV === "production" ? MAX_ACCEPTED_ACCURACY_METERS : 3000);
+  const throttleMs = options.throttleMs ?? 3000;
+  const maxAccuracy = options.maxAccuracyMeters ?? 2000;
   const windowSize = options.windowSize ?? 3;
 
   const [state, setState] = useState<GeolocationState>({
@@ -149,7 +147,7 @@ export function useGeolocationTracker(options: TrackerOptions = {}) {
     const coords = position.coords;
     const rawAccuracy = coords.accuracy;
 
-    // Drop low-accuracy points
+    // Drop only points with accuracy worse than maxAccuracy (2000m)
     if (rawAccuracy > maxAccuracy) {
       setState((prev) => ({
         ...prev,

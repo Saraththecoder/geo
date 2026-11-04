@@ -71,7 +71,7 @@ export function StopForm({ initialData, onSave, onCancel }: StopFormProps) {
             type="number"
             step="0.000001"
             required
-            placeholder="e.g. 13.0827"
+            placeholder="e.g. 13.6649"
             value={lat}
             onChange={(e) => setLat(e.target.value)}
             className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm"

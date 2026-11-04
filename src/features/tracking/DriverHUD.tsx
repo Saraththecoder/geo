@@ -13,7 +13,7 @@ import { db } from "@/lib/firebase/client";
 export function DriverHUD() {
   const { user } = useAuth();
   const wakeLock = useWakeLock();
-  const tracker = useGeolocationTracker({ throttleMs: 3000, maxAccuracyMeters: 50 });
+  const tracker = useGeolocationTracker({ throttleMs: 3000, maxAccuracyMeters: 2000 });
 
   const [buses, setBuses] = useState<Bus[]>([]);
   const [routes, setRoutes] = useState<Record<string, BusRoute>>({});
@@ -124,10 +124,30 @@ export function DriverHUD() {
         throw new Error("Geolocation could not be started.");
       }
 
-      // 4. Send initial coordinate immediately so student map doesn't wait
-      const firstCoord = currentRoute?.polyline?.[0] || [13.0827, 80.2707];
-      if (firstCoord) {
-        await tracker.manualUpdate(firstCoord[0], firstCoord[1], 0, 0);
+      // 4. Send initial coordinate immediately (prefer real device GPS fix)
+      if (typeof window !== "undefined" && "geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            await tracker.manualUpdate(
+              pos.coords.latitude,
+              pos.coords.longitude,
+              pos.coords.speed || 0,
+              pos.coords.heading || 0
+            );
+          },
+          async () => {
+            const firstCoord = currentRoute?.polyline?.[0] || [13.6649, 79.49965];
+            if (firstCoord) {
+              await tracker.manualUpdate(firstCoord[0], firstCoord[1], 0, 0);
+            }
+          },
+          { enableHighAccuracy: true, timeout: 5000, maximumAge: 30000 }
+        );
+      } else {
+        const firstCoord = currentRoute?.polyline?.[0] || [13.6649, 79.49965];
+        if (firstCoord) {
+          await tracker.manualUpdate(firstCoord[0], firstCoord[1], 0, 0);
+        }
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error starting trip";

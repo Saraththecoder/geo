@@ -73,7 +73,7 @@ export default function LiveMapInner({
       ? [myStop.lat, myStop.lng]
       : stops[0]
         ? [stops[0].lat, stops[0].lng]
-        : [13.0827, 80.2707]; // Fallback coordinates
+        : [13.6649, 79.49965]; // Fallback coordinates (AITS Tirupati Campus)
 
   // Generate polyline from route.polyline or from stops
   const polylineCoords: [number, number][] =
