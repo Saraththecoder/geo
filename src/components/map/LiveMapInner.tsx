@@ -116,7 +116,7 @@ export default function LiveMapInner({
 
         {/* Live Bus Marker */}
         {busLocation && (
-          <BusMarker location={busLocation} busNumber={busNumber} autoCenter={false} />
+          <BusMarker location={busLocation} busNumber={busNumber} autoCenter={true} />
         )}
 
         <MapController

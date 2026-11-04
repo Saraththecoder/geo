@@ -40,6 +40,7 @@ export function useGeolocationTracker(options: TrackerOptions = {}) {
   });
 
   const watchIdRef = useRef<number | null>(null);
+  const pollIntervalRef = useRef<number | null>(null);
   const filterRef = useRef<MovingAverageFilter>(new MovingAverageFilter(windowSize));
   const lastWriteTsRef = useRef<number>(0);
   const queuedPingRef = useRef<LiveBusLocation | null>(null);
@@ -245,6 +246,21 @@ export function useGeolocationTracker(options: TrackerOptions = {}) {
       );
 
       watchIdRef.current = watchId;
+
+      // Also actively poll getCurrentPosition every 4s to ensure continuous pings
+      // even when device is stationary or watchPosition sleeps
+      if (pollIntervalRef.current !== null) {
+        clearInterval(pollIntervalRef.current);
+      }
+      pollIntervalRef.current = window.setInterval(() => {
+        if (!activeTripRef.current) return;
+        navigator.geolocation.getCurrentPosition(
+          (pos) => successHandlerRef.current(pos),
+          (err) => console.debug("GPS interval tick:", err.message),
+          { enableHighAccuracy: true, timeout: 5000, maximumAge: 5000 }
+        );
+      }, 4000);
+
       setState((prev) => ({
         ...prev,
         isTracking: true,
@@ -261,6 +277,10 @@ export function useGeolocationTracker(options: TrackerOptions = {}) {
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
+    }
+    if (pollIntervalRef.current !== null) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
     }
 
     // If an active trip was running, mark status ended in RTDB
@@ -293,6 +313,9 @@ export function useGeolocationTracker(options: TrackerOptions = {}) {
     return () => {
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+      if (pollIntervalRef.current !== null) {
+        clearInterval(pollIntervalRef.current);
       }
     };
   }, []);
