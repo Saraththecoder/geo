@@ -62,6 +62,16 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
+  if (isStudentRoute && roleCookie === "driver") {
+    // Driver attempting to access student route: redirect to driver HUD
+    return NextResponse.redirect(new URL("/trip", request.url));
+  }
+
+  if (isStudentRoute && roleCookie === "admin") {
+    // Admin attempting to access student route: redirect to admin panel
+    return NextResponse.redirect(new URL("/admin/trips", request.url));
+  }
+
   return NextResponse.next();
 }
 

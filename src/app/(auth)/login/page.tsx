@@ -17,14 +17,12 @@ function LoginForm() {
 
   useEffect(() => {
     if (user && !isLoading) {
-      if (from) {
-        router.replace(from);
-      } else if (role === "admin") {
+      if (role === "admin") {
         router.replace("/admin/trips");
       } else if (role === "driver") {
         router.replace("/trip");
       } else {
-        router.replace("/dashboard");
+        router.replace(from && from.startsWith("/dashboard") ? from : "/dashboard");
       }
     }
   }, [user, role, isLoading, from, router]);

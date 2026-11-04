@@ -151,12 +151,18 @@ export default function StudentDashboardPage() {
     return () => clearTimeout(handler);
   }, [liveBus.location, liveBus.isOnTrip, myStopId, stops]);
 
-  // Redirect unauthenticated visitors to login
+  // Redirect unauthenticated visitors to login, and drivers/admins to their respective portals
   useEffect(() => {
     if (!authLoading && !user) {
       router.replace("/login?from=/dashboard");
+    } else if (!authLoading && user && profile) {
+      if (profile.role === "driver") {
+        router.replace("/trip");
+      } else if (profile.role === "admin") {
+        router.replace("/admin/trips");
+      }
     }
-  }, [authLoading, user, router]);
+  }, [authLoading, user, profile, router]);
 
   const myStop = stops.find((s) => s.id === myStopId);
 

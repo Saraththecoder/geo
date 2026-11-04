@@ -43,6 +43,23 @@ export function Navbar() {
 
         {user ? (
           <div className="flex items-center gap-3">
+            {role === "driver" && (
+              <Link
+                href="/trip"
+                className="rounded-lg bg-blue-600/10 px-2.5 py-1 text-xs font-semibold text-blue-600 transition hover:bg-blue-600/20 dark:text-blue-400"
+              >
+                Driver Console
+              </Link>
+            )}
+            {role === "admin" && (
+              <Link
+                href="/admin/trips"
+                className="rounded-lg bg-purple-600/10 px-2.5 py-1 text-xs font-semibold text-purple-600 transition hover:bg-purple-600/20 dark:text-purple-400"
+              >
+                Admin Panel
+              </Link>
+            )}
+
             <span
               className={`rounded-lg px-2.5 py-1 text-xs font-semibold capitalize ${getRoleBadge(
                 role
