@@ -41,7 +41,7 @@ export function Navbar() {
           </span>
         </Link>
 
-        {user && (
+        {user ? (
           <div className="flex items-center gap-3">
             <span
               className={`rounded-lg px-2.5 py-1 text-xs font-semibold capitalize ${getRoleBadge(
@@ -63,6 +63,13 @@ export function Navbar() {
               Sign Out
             </button>
           </div>
+        ) : (
+          <Link
+            href="/login"
+            className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow transition hover:bg-primary/90"
+          >
+            Sign In
+          </Link>
         )}
       </div>
     </header>

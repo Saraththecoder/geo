@@ -32,9 +32,22 @@ export async function GET(request: NextRequest) {
 
     const uid = decoded.uid;
 
-    // 2. Fetch student user profile
+    // 2. Fetch student user profile by UID or email
     const userDoc = await adminFirestore.collection("users").doc(uid).get();
-    if (!userDoc.exists) {
+    let userData = userDoc.exists ? userDoc.data() : null;
+
+    if (!userData && decoded.email) {
+      const emailQuery = await adminFirestore
+        .collection("users")
+        .where("email", "==", decoded.email)
+        .limit(1)
+        .get();
+      if (!emailQuery.empty) {
+        userData = emailQuery.docs[0]?.data();
+      }
+    }
+
+    if (!userData) {
       return NextResponse.json(
         {
           success: false,
@@ -43,8 +56,6 @@ export async function GET(request: NextRequest) {
         { status: 404 }
       );
     }
-
-    const userData = userDoc.data();
     const allocatedBusId = userData?.allocatedBusId;
     const stopId = userData?.stopId;
 

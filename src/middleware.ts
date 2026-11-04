@@ -7,7 +7,6 @@ export function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get("__session")?.value;
   const roleCookie = request.cookies.get("user_role")?.value; // "student" | "driver" | "admin"
 
-  const isAuthRoute = pathname.startsWith("/login");
   const isStudentRoute = pathname.startsWith("/dashboard");
   const isDriverRoute = pathname.startsWith("/trip");
   const isAdminRoute = pathname.startsWith("/admin");
@@ -35,8 +34,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Authenticated user on login or root page: redirect to role's home view
-  if (isAuthRoute || pathname === "/") {
+  // Authenticated user on root page: redirect to role's home view
+  if (pathname === "/") {
     if (roleCookie === "admin") {
       return NextResponse.redirect(new URL("/admin/trips", request.url));
     }

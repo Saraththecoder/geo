@@ -179,7 +179,41 @@ export default function StudentDashboardPage() {
   }
 
   if (!user) {
-    return null;
+    return (
+      <div className="flex min-h-screen flex-col bg-slate-50/50 dark:bg-slate-950">
+        <Navbar />
+        <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center p-6 text-center">
+          <div className="space-y-4 rounded-2xl border bg-card p-8 shadow-sm">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <svg
+                className="h-7 w-7"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold tracking-tight">Please Sign In</h2>
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              Sign in with your student account to view your allocated bus, route, and
+              real-time ETAs.
+            </p>
+            <button
+              onClick={() => router.push("/login?from=/dashboard")}
+              className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow transition-colors hover:bg-primary/90"
+            >
+              Sign In with Google
+            </button>
+          </div>
+        </main>
+      </div>
+    );
   }
 
   return (

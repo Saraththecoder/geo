@@ -75,21 +75,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           throw new Error(errData?.error?.message || "Failed to create server session");
         }
 
-        // Fetch user profile from Firestore
-        const userDocRef = doc(db, "users", currentUser.uid);
-        const userDocSnap = await getDoc(userDocRef);
+        const sessionJson = await res.json();
+        const serverData = sessionJson?.data;
 
-        if (userDocSnap.exists()) {
-          const data = userDocSnap.data() as UserProfile;
-          setProfile(data);
-          setRole(data.role);
-        } else {
-          // Fallback to token claims or student default
-          const tokenResult = await currentUser.getIdTokenResult();
-          const userRole = (tokenResult.claims.role as UserRole) || "student";
-          setRole(userRole);
+        let userRole: UserRole = (serverData?.role as UserRole) || "student";
+        let userProfile: UserProfile = {
+          uid: currentUser.uid,
+          email: currentUser.email || "",
+          name: currentUser.displayName || currentUser.email?.split("@")[0] || "User",
+          role: userRole,
+          allocatedBusId: serverData?.allocatedBusId || null,
+          stopId: serverData?.stopId || null,
+          fcmTokens: [],
+        };
+
+        // Fetch user profile from Firestore if available on client
+        try {
+          const userDocRef = doc(db, "users", currentUser.uid);
+          const userDocSnap = await getDoc(userDocRef);
+
+          if (userDocSnap.exists()) {
+            const data = userDocSnap.data() as UserProfile;
+            userProfile = { ...userProfile, ...data };
+            if (data.role) {
+              userRole = data.role;
+            }
+          }
+        } catch (clientFsErr) {
+          console.warn(
+            "Client Firestore profile read fallback (using server session profile):",
+            clientFsErr
+          );
         }
 
+        setProfile(userProfile);
+        setRole(userRole);
         setUser(currentUser);
         setError(null);
       } catch (err: unknown) {
