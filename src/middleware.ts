@@ -12,8 +12,11 @@ export function middleware(request: NextRequest) {
   const isStudentRoute = pathname.startsWith("/dashboard");
   const isDriverRoute = pathname.startsWith("/trip");
   const isAdminRoute = pathname.startsWith("/admin");
-  const isApiAuth = pathname.startsWith("/api/auth");
-  const isProtectedApi = pathname.startsWith("/api/") && !isApiAuth;
+  const isPublicApi =
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/eta") ||
+    (pathname.startsWith("/api/telemetry") && request.method === "GET");
+  const isProtectedApi = pathname.startsWith("/api/") && !isPublicApi;
 
   // Unauthenticated user trying to access protected routes
   if (!sessionCookie && !hasBearerToken) {

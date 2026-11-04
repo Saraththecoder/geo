@@ -117,7 +117,26 @@ export function useGeolocationTracker(options: TrackerOptions = {}) {
         queuedCount: 0,
       }));
     } catch (err: unknown) {
-      console.warn("RTDB write failed, queueing point:", err);
+      console.warn("RTDB write warning, attempting API fallback:", err);
+      try {
+        const res = await fetch("/api/telemetry/live", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ busId, location }),
+        });
+        if (res.ok) {
+          lastWriteTsRef.current = now;
+          queuedPingRef.current = null;
+          setState((prev) => ({
+            ...prev,
+            pingsSent: prev.pingsSent + 1,
+            queuedCount: 0,
+          }));
+          return;
+        }
+      } catch (fallbackErr) {
+        console.warn("Telemetry fallback also failed:", fallbackErr);
+      }
       queuedPingRef.current = location;
       setState((prev) => ({
         ...prev,
