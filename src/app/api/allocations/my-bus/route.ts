@@ -105,17 +105,24 @@ export async function GET(request: NextRequest) {
       ...doc.data(),
     })) as Stop[];
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        allocated: true,
-        allocatedBusId,
-        myStopId: stopId || null,
-        bus,
-        route,
-        stops,
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          allocated: true,
+          allocatedBusId,
+          myStopId: stopId || null,
+          bus,
+          route,
+          stops,
+        },
       },
-    });
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        },
+      }
+    );
   } catch (error: any) {
     console.error("Error fetching student bus allocation:", error);
     return NextResponse.json(

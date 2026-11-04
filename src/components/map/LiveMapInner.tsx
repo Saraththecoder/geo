@@ -30,14 +30,17 @@ function MapController({
   targetToCenter: "bus" | "stop" | "route" | null;
 }) {
   const map = useMap();
-  const hasAutoFittedRef = useRef<boolean>(false);
+  const lastPolylineKeyRef = useRef<string>("");
 
-  // Auto-fit route bounds once route polyline is available
+  // Auto-fit route bounds whenever route polyline loads or changes
   useEffect(() => {
-    if (!hasAutoFittedRef.current && routePolyline.length > 0) {
-      hasAutoFittedRef.current = true;
-      const bounds = L.latLngBounds(routePolyline);
-      map.fitBounds(bounds, { padding: [50, 50] });
+    if (routePolyline.length > 0) {
+      const currentKey = `${routePolyline[0]?.[0]},${routePolyline[0]?.[1]}-${routePolyline.length}`;
+      if (lastPolylineKeyRef.current !== currentKey) {
+        lastPolylineKeyRef.current = currentKey;
+        const bounds = L.latLngBounds(routePolyline);
+        map.fitBounds(bounds, { padding: [50, 50] });
+      }
     }
   }, [routePolyline, map]);
 

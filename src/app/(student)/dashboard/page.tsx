@@ -50,6 +50,7 @@ export default function StudentDashboardPage() {
 
         // 1. Fetch through server route handler (bypasses any client rule issues)
         const res = await fetch("/api/allocations/my-bus", {
+          cache: "no-store",
           headers: {
             Authorization: `Bearer ${idToken}`,
           },
