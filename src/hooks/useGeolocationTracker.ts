@@ -280,6 +280,9 @@ export function useGeolocationTracker(options: TrackerOptions = {}) {
     };
   }, []);
 
+  const transmitRef = useRef(transmitLocation);
+  transmitRef.current = transmitLocation;
+
   const manualUpdate = useCallback(
     async (lat: number, lng: number, speed: number = 30, heading: number = 90) => {
       if (!activeTripRef.current) return;
@@ -299,7 +302,7 @@ export function useGeolocationTracker(options: TrackerOptions = {}) {
         currentPosition: payload,
         error: null,
       }));
-      await transmitLocation(activeTripRef.current.busId, payload);
+      await transmitRef.current(activeTripRef.current.busId, payload);
     },
     []
   );

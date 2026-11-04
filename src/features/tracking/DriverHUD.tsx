@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Bus, BusRoute, Trip } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useWakeLock } from "@/hooks/useWakeLock";
@@ -319,7 +319,8 @@ export function DriverHUD() {
                 Desktop GPS Simulation Mode
               </p>
               <p className="text-xs text-muted-foreground">
-                Simulates driving along the route (1 ping every 4s) so student map moves in real-time.
+                Simulates driving along the route (1 ping every 4s) so student map moves
+                in real-time.
               </p>
             </div>
             <button
