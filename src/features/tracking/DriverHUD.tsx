@@ -23,6 +23,8 @@ export function DriverHUD() {
   const [actionLoading, setActionLoading] = useState<boolean>(false);
   const [showEndConfirm, setShowEndConfirm] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSimulating, setIsSimulating] = useState<boolean>(false);
+  const simIndexRef = useRef<number>(0);
 
   // Load buses and routes assigned to driver or all buses
   useEffect(() => {
@@ -121,6 +123,12 @@ export function DriverHUD() {
       if (!started) {
         throw new Error("Geolocation could not be started.");
       }
+
+      // 4. Send initial coordinate immediately so student map doesn't wait
+      const firstCoord = currentRoute?.polyline?.[0] || [13.0827, 80.2707];
+      if (firstCoord) {
+        await tracker.manualUpdate(firstCoord[0], firstCoord[1], 0, 0);
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error starting trip";
       setErrorMessage(msg);
@@ -165,6 +173,7 @@ export function DriverHUD() {
 
       setActiveTrip(null);
       setShowEndConfirm(false);
+      setIsSimulating(false);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error ending trip";
       setErrorMessage(msg);
@@ -175,6 +184,22 @@ export function DriverHUD() {
 
   const currentBus = buses.find((b) => b.id === selectedBusId);
   const currentRoute = currentBus ? routes[currentBus.routeId] : undefined;
+
+  // GPS Simulation loop for desktop testing
+  useEffect(() => {
+    if (!isSimulating || !activeTrip || !currentRoute?.polyline?.length) return;
+
+    const interval = setInterval(async () => {
+      const coords = currentRoute.polyline;
+      simIndexRef.current = (simIndexRef.current + 1) % coords.length;
+      const pt = coords[simIndexRef.current];
+      if (pt) {
+        await tracker.manualUpdate(pt[0], pt[1], 35, 90);
+      }
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [isSimulating, activeTrip, currentRoute, tracker]);
 
   if (loading) {
     return (
@@ -284,6 +309,33 @@ export function DriverHUD() {
         queuedCount={tracker.queuedCount}
         error={tracker.error}
       />
+
+      {/* Desktop Simulation Mode for live testing */}
+      {activeTrip && (
+        <div className="rounded-2xl border border-blue-500/20 bg-blue-50/50 p-4 dark:bg-blue-950/20">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-bold text-foreground">
+                Desktop GPS Simulation Mode
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Simulates driving along the route (1 ping every 4s) so student map moves in real-time.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsSimulating((prev) => !prev)}
+              className={`rounded-xl px-4 py-2.5 text-xs font-bold shadow transition ${
+                isSimulating
+                  ? "bg-amber-600 text-white hover:bg-amber-700"
+                  : "bg-primary text-primary-foreground hover:bg-primary/90"
+              }`}
+            >
+              {isSimulating ? "⏸ Pause Simulation" : "▶ Start Driving Simulation"}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Big Action Button (Start / End Trip) */}
       <div className="pt-2">

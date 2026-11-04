@@ -30,7 +30,11 @@ if (getApps().length === 0) {
 
 auth = getAuth(app);
 db = getFirestore(app);
-rtdb = getDatabase(app);
+rtdb = getDatabase(
+  app,
+  process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL ||
+    "https://aitsbus-default-rtdb.asia-southeast1.firebasedatabase.app"
+);
 
 // Connect to local emulators if configured
 const useEmulator = process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === "true";

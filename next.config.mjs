@@ -6,7 +6,7 @@ const cspHeader = `
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com;
   img-src 'self' blob: data: https://*.tile.openstreetmap.org https://lh3.googleusercontent.com https://unpkg.com;
   font-src 'self' https://fonts.gstatic.com;
-  connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://fcmregistrations.googleapis.com https://router.project-osrm.org http://127.0.0.1:* ws://127.0.0.1:*;
+  connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://fcmregistrations.googleapis.com https://router.project-osrm.org http://127.0.0.1:* ws://127.0.0.1:*;
   frame-src 'self' https://*.firebaseapp.com;
   object-src 'none';
   base-uri 'self';

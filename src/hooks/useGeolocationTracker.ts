@@ -25,7 +25,9 @@ export interface GeolocationState {
 
 export function useGeolocationTracker(options: TrackerOptions = {}) {
   const throttleMs = options.throttleMs ?? 5000;
-  const maxAccuracy = options.maxAccuracyMeters ?? MAX_ACCEPTED_ACCURACY_METERS;
+  const maxAccuracy =
+    options.maxAccuracyMeters ??
+    (process.env.NODE_ENV === "production" ? MAX_ACCEPTED_ACCURACY_METERS : 3000);
   const windowSize = options.windowSize ?? 3;
 
   const [state, setState] = useState<GeolocationState>({
@@ -278,9 +280,34 @@ export function useGeolocationTracker(options: TrackerOptions = {}) {
     };
   }, []);
 
+  const manualUpdate = useCallback(
+    async (lat: number, lng: number, speed: number = 30, heading: number = 90) => {
+      if (!activeTripRef.current) return;
+      const payload: LiveBusLocation = {
+        lat,
+        lng,
+        speed,
+        heading,
+        accuracy: 5,
+        ts: Date.now(),
+        tripId: activeTripRef.current.tripId,
+        driverUid: activeTripRef.current.driverUid,
+        status: "active",
+      };
+      setState((prev) => ({
+        ...prev,
+        currentPosition: payload,
+        error: null,
+      }));
+      await transmitLocation(activeTripRef.current.busId, payload);
+    },
+    []
+  );
+
   return {
     ...state,
     startTracking,
     stopTracking,
+    manualUpdate,
   };
 }
