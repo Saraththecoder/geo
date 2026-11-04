@@ -6,7 +6,7 @@ import { rtdb } from "@/lib/firebase/client";
 import { LiveBusLocation } from "@/types";
 
 const SIGNAL_LOST_THRESHOLD_MS = 30000; // 30 seconds
-const FALLBACK_POLL_INTERVAL_MS = 2500; // 2.5 seconds
+const FALLBACK_POLL_INTERVAL_MS = 2000; // 2 seconds
 
 export interface UseLiveBusReturn {
   location: LiveBusLocation | null;
@@ -23,11 +23,9 @@ export function useLiveBus(busId: string | null | undefined): UseLiveBusReturn {
   const [isSignalLost, setIsSignalLost] = useState<boolean>(false);
 
   const lastUpdateTsRef = useRef<number>(0);
-  const isMountedRef = useRef<boolean>(true);
 
   // Apply location update safely
   const applyLocationUpdate = useCallback((newLoc: LiveBusLocation | null) => {
-    if (!isMountedRef.current) return;
     if (newLoc) {
       setLocation(newLoc);
       lastUpdateTsRef.current = newLoc.ts || Date.now();
@@ -41,8 +39,6 @@ export function useLiveBus(busId: string | null | undefined): UseLiveBusReturn {
 
   // 1. Direct WebSocket subscription to Firebase RTDB
   useEffect(() => {
-    isMountedRef.current = true;
-
     if (!busId) {
       setLocation(null);
       setIsLoading(false);
@@ -77,7 +73,7 @@ export function useLiveBus(busId: string | null | undefined): UseLiveBusReturn {
     };
   }, [busId, applyLocationUpdate]);
 
-  // 2. High-reliability HTTP telemetry polling fallback (every 2.5s)
+  // 2. High-reliability HTTP telemetry polling fallback (every 2s)
   // Ensures real-time data flow even if WebSockets are restricted by CSP, proxy, or rules
   useEffect(() => {
     if (!busId) return;
@@ -90,15 +86,10 @@ export function useLiveBus(busId: string | null | undefined): UseLiveBusReturn {
         if (res.ok) {
           const json = await res.json();
           if (json.success && json.data) {
-            const serverLoc = json.data as LiveBusLocation;
-            // Only update if newer or if currently null
-            if (!lastUpdateTsRef.current || (serverLoc.ts && serverLoc.ts >= lastUpdateTsRef.current)) {
-              applyLocationUpdate(serverLoc);
-            }
+            applyLocationUpdate(json.data as LiveBusLocation);
           }
         }
       } catch (pollErr) {
-        // Non-fatal, will retry next tick
         console.debug("Telemetry polling tick error:", pollErr);
       }
     }
@@ -109,7 +100,20 @@ export function useLiveBus(busId: string | null | undefined): UseLiveBusReturn {
     // Recurring poll
     const pollTimer = setInterval(pollLiveTelemetry, FALLBACK_POLL_INTERVAL_MS);
 
-    return () => clearInterval(pollTimer);
+    // Immediate poll when switching back to this tab
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        pollLiveTelemetry();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("focus", handleVisibility);
+
+    return () => {
+      clearInterval(pollTimer);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("focus", handleVisibility);
+    };
   }, [busId, applyLocationUpdate]);
 
   // 3. Tick timer every second to compute secondsSinceUpdate and detect signal lost (>30s)
@@ -129,12 +133,6 @@ export function useLiveBus(busId: string | null | undefined): UseLiveBusReturn {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-    };
   }, []);
 
   const isOnTrip = location?.status === "active";

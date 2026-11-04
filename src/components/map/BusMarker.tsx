@@ -44,6 +44,13 @@ export function BusMarker({ location, busNumber, autoCenter = false }: BusMarker
 
   useEffect(() => {
     if (
+      markerRef.current &&
+      typeof location.lat === "number" &&
+      typeof location.lng === "number"
+    ) {
+      markerRef.current.setLatLng([location.lat, location.lng]);
+    }
+    if (
       autoCenter &&
       typeof location.lat === "number" &&
       typeof location.lng === "number"
