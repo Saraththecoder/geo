@@ -75,6 +75,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           throw new Error(errData?.error?.message || "Failed to create server session");
         }
 
+        // Force refresh ID token so custom claims (role, allocatedBusId) are immediately available in the client token
+        try {
+          await currentUser.getIdToken(true);
+        } catch (tokenRefreshErr) {
+          console.warn("Non-fatal token refresh warning:", tokenRefreshErr);
+        }
+
         const sessionJson = await res.json();
         const serverData = sessionJson?.data;
 

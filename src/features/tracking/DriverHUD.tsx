@@ -13,7 +13,7 @@ import { db } from "@/lib/firebase/client";
 export function DriverHUD() {
   const { user } = useAuth();
   const wakeLock = useWakeLock();
-  const tracker = useGeolocationTracker({ throttleMs: 5000, maxAccuracyMeters: 50 });
+  const tracker = useGeolocationTracker({ throttleMs: 3000, maxAccuracyMeters: 50 });
 
   const [buses, setBuses] = useState<Bus[]>([]);
   const [routes, setRoutes] = useState<Record<string, BusRoute>>({});
@@ -196,7 +196,7 @@ export function DriverHUD() {
       if (pt) {
         await tracker.manualUpdate(pt[0], pt[1], 35, 90);
       }
-    }, 4000);
+    }, 3500);
 
     return () => clearInterval(interval);
   }, [isSimulating, activeTrip, currentRoute, tracker]);

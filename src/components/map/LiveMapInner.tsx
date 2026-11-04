@@ -30,6 +30,16 @@ function MapController({
   targetToCenter: "bus" | "stop" | "route" | null;
 }) {
   const map = useMap();
+  const hasAutoFittedRef = useRef<boolean>(false);
+
+  // Auto-fit route bounds once route polyline is available
+  useEffect(() => {
+    if (!hasAutoFittedRef.current && routePolyline.length > 0) {
+      hasAutoFittedRef.current = true;
+      const bounds = L.latLngBounds(routePolyline);
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [routePolyline, map]);
 
   useEffect(() => {
     if (targetToCenter === "bus" && busLocation) {

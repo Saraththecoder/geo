@@ -6,6 +6,8 @@ export function middleware(request: NextRequest) {
 
   const sessionCookie = request.cookies.get("__session")?.value;
   const roleCookie = request.cookies.get("user_role")?.value; // "student" | "driver" | "admin"
+  const authHeader = request.headers.get("authorization");
+  const hasBearerToken = !!(authHeader && authHeader.startsWith("Bearer "));
 
   const isStudentRoute = pathname.startsWith("/dashboard");
   const isDriverRoute = pathname.startsWith("/trip");
@@ -14,7 +16,7 @@ export function middleware(request: NextRequest) {
   const isProtectedApi = pathname.startsWith("/api/") && !isApiAuth;
 
   // Unauthenticated user trying to access protected routes
-  if (!sessionCookie) {
+  if (!sessionCookie && !hasBearerToken) {
     if (isStudentRoute || isDriverRoute || isAdminRoute) {
       const loginUrl = new URL("/login", request.url);
       loginUrl.searchParams.set("from", pathname);

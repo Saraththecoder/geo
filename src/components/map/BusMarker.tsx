@@ -15,18 +15,26 @@ export function BusMarker({ location, busNumber, autoCenter = false }: BusMarker
   const map = useMap();
   const markerRef = useRef<L.Marker | null>(null);
 
+  const isActive = location.status === "active";
+  const bgClass = isActive ? "bg-primary" : "bg-slate-600";
+  const statusLabel = isActive ? `Bus #${busNumber}` : `Bus #${busNumber} (Parked)`;
+
   // Smooth heading rotation & bus icon styling
   const busIcon = L.divIcon({
     className: "bus-custom-marker",
     html: `
       <div style="transform: rotate(${location.heading || 0}deg); transition: transform 0.5s ease;" class="relative flex items-center justify-center">
-        <div class="h-11 w-11 rounded-2xl bg-primary text-white shadow-xl flex items-center justify-center border-2 border-white ring-4 ring-primary/20">
+        <div class="h-11 w-11 rounded-2xl ${bgClass} text-white shadow-xl flex items-center justify-center border-2 border-white ring-4 ${
+          isActive ? "ring-primary/20" : "ring-slate-400/20"
+        }">
           <svg style="width: 22px; height: 22px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8 17h.01M16 17h.01M9 11h6M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2zm0 0v2m14-2v2" />
           </svg>
         </div>
-        <div style="top: -24px;" class="absolute whitespace-nowrap rounded-md bg-slate-900/90 px-2 py-0.5 text-[10px] font-bold text-white shadow">
-          Bus #${busNumber}
+        <div style="top: -24px;" class="absolute whitespace-nowrap rounded-md ${
+          isActive ? "bg-slate-900/90 text-white" : "bg-slate-700/90 text-slate-200"
+        } px-2 py-0.5 text-[10px] font-bold shadow">
+          ${statusLabel}
         </div>
       </div>
     `,
