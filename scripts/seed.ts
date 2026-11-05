@@ -35,14 +35,18 @@ const db = admin.firestore();
 async function seed() {
   console.info("🌱 Starting College Bus Tracker data seeding...");
 
-  // 1. Seed Stops
+  // 1. Seed Stops (AITS Tirupati & City Corridor)
   const stops = [
-    { id: "stop_main_gate", name: "Main Campus Entrance", lat: 13.0827, lng: 80.2707 },
-    { id: "stop_library", name: "Central Library", lat: 13.0850, lng: 80.2740 },
-    { id: "stop_tech_park", name: "Computer Science Block", lat: 13.0880, lng: 80.2780 },
-    { id: "stop_hostel_junc", name: "Hostel Junction", lat: 13.0920, lng: 80.2820 },
-    { id: "stop_sports_complex", name: "Sports Arena", lat: 13.0960, lng: 80.2860 },
-    { id: "stop_metro", name: "Metro Station Transit Point", lat: 13.1000, lng: 80.2900 },
+    { id: "stop_bus_station", name: "Tirupati RTC Central Bus Station", lat: 13.6265, lng: 79.4277 },
+    { id: "stop_railway_station", name: "Tirupati Railway Station", lat: 13.6288, lng: 79.4192 },
+    { id: "stop_ramanuja_circle", name: "Ramanuja Circle", lat: 13.6335, lng: 79.4350 },
+    { id: "stop_karakambadi", name: "Karakambadi Road Junction", lat: 13.6480, lng: 79.4650 },
+    { id: "stop_sports_complex", name: "AITS Sports Ground", lat: 13.6635, lng: 79.4980 },
+    { id: "stop_library", name: "Central Library (AITS)", lat: 13.6645, lng: 79.4990 },
+    { id: "stop_tech_park", name: "Computer Science & Engineering Block", lat: 13.6648, lng: 79.4998 },
+    { id: "stop_main_gate", name: "AITS Main Campus Entrance", lat: 13.6655, lng: 79.5005 },
+    { id: "stop_hostel_junc", name: "AITS Student Hostel Block", lat: 13.6660, lng: 79.5015 },
+    { id: "stop_metro", name: "Renigunta Railway Junction", lat: 13.6508, lng: 79.5165 },
   ];
 
   for (const stop of stops) {
@@ -50,28 +54,41 @@ async function seed() {
   }
   console.info(`✓ Seeded ${stops.length} transit stops`);
 
-  // 2. Seed Routes
+  // 2. Seed Routes (AITS Tirupati Corridor)
   const routes = [
     {
       id: "route_campus_express",
-      name: "Campus Express Corridor",
-      stopIds: ["stop_main_gate", "stop_library", "stop_tech_park", "stop_metro"],
+      name: "Tirupati City to AITS Campus Corridor",
+      stopIds: [
+        "stop_bus_station",
+        "stop_railway_station",
+        "stop_ramanuja_circle",
+        "stop_karakambadi",
+        "stop_library",
+        "stop_main_gate",
+      ],
       polyline: [
-        [13.0827, 80.2707],
-        [13.0850, 80.2740],
-        [13.0880, 80.2780],
-        [13.1000, 80.2900],
+        [13.6265, 79.4277],
+        [13.6288, 79.4192],
+        [13.6335, 79.4350],
+        [13.6420, 79.4500],
+        [13.6480, 79.4650],
+        [13.6550, 79.4800],
+        [13.6645, 79.4990],
+        [13.6648, 79.4998],
+        [13.6655, 79.5005],
       ],
       isActive: true,
     },
     {
       id: "route_hostel_shuttle",
-      name: "Hostel & Sports Complex Shuttle",
-      stopIds: ["stop_main_gate", "stop_hostel_junc", "stop_sports_complex"],
+      name: "AITS Hostel & Sports Shuttle",
+      stopIds: ["stop_sports_complex", "stop_library", "stop_main_gate", "stop_hostel_junc"],
       polyline: [
-        [13.0827, 80.2707],
-        [13.0920, 80.2820],
-        [13.0960, 80.2860],
+        [13.6635, 79.4980],
+        [13.6645, 79.4990],
+        [13.6655, 79.5005],
+        [13.6660, 79.5015],
       ],
       isActive: true,
     },
