@@ -50,6 +50,7 @@ export interface Stop {
   name: string;
   lat: number;
   lng: number;
+  pickupTime?: string;
 }
 
 export interface BusRoute {

@@ -12,6 +12,7 @@ interface StopFormProps {
 
 export function StopForm({ initialData, onSave, onCancel }: StopFormProps) {
   const [name, setName] = useState(initialData?.name || "");
+  const [pickupTime, setPickupTime] = useState(initialData?.pickupTime || "");
   const [lat, setLat] = useState(initialData?.lat ? String(initialData.lat) : "");
   const [lng, setLng] = useState(initialData?.lng ? String(initialData.lng) : "");
   const [error, setError] = useState<string | null>(null);
@@ -21,11 +22,12 @@ export function StopForm({ initialData, onSave, onCancel }: StopFormProps) {
     e.preventDefault();
     setError(null);
 
-    const stopPayload = {
+    const stopPayload: Stop = {
       id: initialData?.id || `stop_${Date.now()}`,
       name: name.trim(),
       lat: parseFloat(lat),
       lng: parseFloat(lng),
+      ...(pickupTime.trim() ? { pickupTime: pickupTime.trim() } : {}),
     };
 
     const validation = stopSchema.safeParse(stopPayload);
@@ -60,6 +62,17 @@ export function StopForm({ initialData, onSave, onCancel }: StopFormProps) {
           placeholder="e.g. Main Gate / Library"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm"
+        />
+      </div>
+
+      <div>
+        <label className="mb-1 block text-xs font-semibold">Scheduled Pickup Time (Optional)</label>
+        <input
+          type="text"
+          placeholder="e.g. 8:30 AM"
+          value={pickupTime}
+          onChange={(e) => setPickupTime(e.target.value)}
           className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm"
         />
       </div>

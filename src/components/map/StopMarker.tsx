@@ -55,6 +55,12 @@ export function StopMarker({ stop, isMyStop, sequenceNumber }: StopMarkerProps) 
               Your Designated Boarding Stop
             </span>
           )}
+          {stop.pickupTime && (
+            <div className="flex items-center gap-1 rounded bg-blue-50 px-1.5 py-0.5 text-[11px] font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+              <span>🕒 Pickup:</span>
+              <span>{stop.pickupTime}</span>
+            </div>
+          )}
           <p className="text-muted-foreground">
             Lat: {stop.lat.toFixed(5)}, Lng: {stop.lng.toFixed(5)}
           </p>

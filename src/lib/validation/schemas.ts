@@ -31,6 +31,7 @@ export const stopSchema = z.object({
   name: z.string().min(1, "Stop name is required"),
   lat: z.number().min(-90).max(90),
   lng: z.number().min(-180).max(180),
+  pickupTime: z.string().optional(),
 });
 
 export const routeSchema = z.object({
